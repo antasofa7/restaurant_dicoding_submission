@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:resto_app/pages/home_page.dart';
 
 class SplashPage extends StatefulWidget {
-  static const routname = '/splash';
+  static const routName = '/splash';
   const SplashPage({super.key});
 
   @override
@@ -18,7 +18,7 @@ class _SplashPageState extends State<SplashPage> {
         const Duration(milliseconds: 3000),
         () => Navigator.pushNamedAndRemoveUntil(
               context,
-              HomePage.routename,
+              HomePage.routeName,
               (route) => false,
             ));
     super.initState();

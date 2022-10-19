@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:resto_app/data/model/restaurant.dart';
+import 'package:provider/provider.dart';
+import 'package:resto_app/data/api/api_service.dart';
 import 'package:resto_app/pages/detail_page.dart';
 import 'package:resto_app/pages/home_page.dart';
+import 'package:resto_app/pages/search_page.dart';
 import 'package:resto_app/pages/splash_page.dart';
+import 'package:resto_app/providers/connectivity_provider.dart';
+import 'package:resto_app/providers/restaurant_detail_provider.dart';
+import 'package:resto_app/providers/restaurant_provider.dart';
+import 'package:resto_app/providers/search_restaurant_provider.dart';
+import 'package:resto_app/providers/theme_notifier.dart';
 import 'package:resto_app/theme.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider<ThemeNotifier>(
+      create: (_) => ThemeNotifier(lightTheme), child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -15,43 +23,37 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        primaryColor: const Color(0xffFC9630),
-        colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: const Color(0xffFC9630),
-              secondary: const Color(0xffFED9B3),
-              background: const Color(0xffF9EDE0),
-            ),
-        textTheme: const TextTheme(
-          headline3: TextStyle(fontFamily: 'Oswald', color: Color(0xffF9EDE0)),
-          headline5: TextStyle(
-              fontFamily: 'PublicSans',
-              fontWeight: semiBold,
-              color: Color(0xffFC9630)),
-          headline6: TextStyle(
-              fontFamily: 'PublicSans',
-              fontWeight: semiBold,
-              color: Color(0xffFC9630)),
-          subtitle1: TextStyle(
-              fontFamily: 'PublicSans',
-              fontWeight: medium,
-              color: Colors.black),
-          bodyText1: TextStyle(fontFamily: 'PublicSans', color: Colors.black),
-          bodyText2: TextStyle(fontFamily: 'PublicSans', color: Colors.black),
+    ThemeMode themeMode = ThemeMode.light;
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<RestaurantProvider>(
+          create: (context) => RestaurantProvider(apiService: ApiService()),
         ),
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-        primarySwatch: Colors.orange,
-      ),
-      debugShowCheckedModeBanner: false,
-      initialRoute: SplashPage.routname,
-      routes: {
-        SplashPage.routname: (context) => const SplashPage(),
-        HomePage.routename: (context) => const HomePage(),
-        DetailPage.routeName: (context) => DetailPage(
-            restaurant:
-                ModalRoute.of(context)?.settings.arguments as RestaurantModel)
-      },
+        ChangeNotifierProvider<SearchRestaurantProvider>(
+          create: (context) =>
+              SearchRestaurantProvider(apiService: ApiService()),
+        ),
+        ChangeNotifierProvider<RestaurantDetailProvider>(
+          create: (context) =>
+              RestaurantDetailProvider(apiService: ApiService(), id: ''),
+        ),
+        ChangeNotifierProvider<ConnectivityProvider>(
+            create: (context) => ConnectivityProvider()),
+      ],
+      child: Consumer<ThemeNotifier>(builder: (context, value, _) {
+        return MaterialApp(
+          theme: value.getTheme(),
+          themeMode: themeMode,
+          debugShowCheckedModeBanner: false,
+          initialRoute: SplashPage.routName,
+          routes: {
+            SplashPage.routName: (context) => const SplashPage(),
+            HomePage.routeName: (context) => const HomePage(),
+            DetailPage.routeName: (context) => const DetailPage(),
+            SearchPage.routeName: (context) => const SearchPage(),
+          },
+        );
+      }),
     );
   }
 }
