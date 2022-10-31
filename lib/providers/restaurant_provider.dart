@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:resto_app/data/api/api_service.dart';
 import 'package:resto_app/data/models/restaurant_list_model.dart';
-
-enum ResultState { loading, noData, hasData, error }
+import 'package:resto_app/utils/result_state.dart';
 
 class RestaurantProvider extends ChangeNotifier {
   final ApiService apiService;
@@ -28,7 +27,7 @@ class RestaurantProvider extends ChangeNotifier {
       final restaurant = await apiService.getRestaurantList();
       if (restaurant.restaurants.isEmpty) {
         _state = ResultState.noData;
-        return _message = 'Empty data';
+        return _message = 'Empty Data';
       } else {
         _state = ResultState.hasData;
         notifyListeners();

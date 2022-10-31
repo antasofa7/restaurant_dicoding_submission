@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:resto_app/data/api/api_service.dart';
 import 'package:resto_app/data/models/customer_review_model.dart';
 import 'package:resto_app/data/models/restaurant_detail_model.dart';
-
-enum ResultState { loading, noData, hasData, error }
+import 'package:resto_app/utils/result_state.dart';
 
 enum SubmitState { loading, succcess, noData }
 

@@ -32,7 +32,7 @@ class SearchRestaurantProvider extends ChangeNotifier {
         _query = query;
         if (restaurant.restaurants.isEmpty) {
           _state = SearchResultState.noData;
-          return _message = 'No match found!';
+          return _message = 'No Match Found!';
         } else {
           _state = SearchResultState.hasData;
           notifyListeners();

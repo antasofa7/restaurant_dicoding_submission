@@ -17,15 +17,15 @@ class SkeletonLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: Colors.grey.shade400,
-      highlightColor: Colors.grey.shade300,
+      baseColor: Theme.of(context).disabledColor,
+      highlightColor: Theme.of(context).highlightColor,
       child: Container(
         width: width,
         height: height,
         margin: margin,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(radius),
-          color: Colors.grey.shade400,
+          color: Theme.of(context).disabledColor,
         ),
       ),
     );

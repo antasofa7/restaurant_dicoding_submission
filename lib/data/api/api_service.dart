@@ -8,10 +8,16 @@ import 'package:resto_app/data/models/review_model.dart';
 import 'package:resto_app/data/models/search_restaurant_model.dart';
 
 class ApiService {
-  static const String _baseUrl = 'https://restaurant-api.dicoding.dev';
+  static const String baseUrl = 'https://restaurant-api.dicoding.dev';
+
+  final http.Client client;
+
+  ApiService({
+    required this.client,
+  });
 
   Future<RestaurantList> getRestaurantList() async {
-    final response = await http.get(Uri.parse("$_baseUrl/list"));
+    final response = await http.get(Uri.parse("$baseUrl/list"));
 
     if (response.statusCode == 200) {
       return RestaurantList.fromJson(jsonDecode(response.body));
@@ -21,17 +27,17 @@ class ApiService {
   }
 
   Future<RestaurantDetail> getRestaurantDetail(String id) async {
-    final response = await http.get(Uri.parse("$_baseUrl/detail/$id"));
+    final response = await client.get(Uri.parse("$baseUrl/detail/$id"));
 
     if (response.statusCode == 200) {
       return RestaurantDetail.fromJson(jsonDecode(response.body));
     } else {
-      throw Exception('Failed to load restaurant detail');
+      throw Exception('Failed to load restaurant detail!');
     }
   }
 
   Future<SearchRestaurant> searchRestaurant(String query) async {
-    final response = await http.get(Uri.parse("$_baseUrl/search?q=$query"));
+    final response = await http.get(Uri.parse("$baseUrl/search?q=$query"));
     if (response.statusCode == 200) {
       return SearchRestaurant.fromJson(jsonDecode(response.body));
     } else {
@@ -40,11 +46,11 @@ class ApiService {
   }
 
   String imageMediumUrl(String pictureId) {
-    return '$_baseUrl/images/medium/$pictureId';
+    return '$baseUrl/images/medium/$pictureId';
   }
 
   Future<Review> addReview(CustomerReviewModel dataReview) async {
-    final response = await http.post(Uri.parse("$_baseUrl/review"), body: {
+    final response = await http.post(Uri.parse("$baseUrl/review"), body: {
       "id": dataReview.id,
       "name": dataReview.name,
       "review": dataReview.review

@@ -1,10 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:resto_app/common/navigation.dart';
 import 'package:resto_app/data/models/restaurant_list_model.dart';
 import 'package:resto_app/data/models/search_restaurant_model.dart';
 import 'package:resto_app/providers/restaurant_provider.dart';
 import 'package:resto_app/providers/search_restaurant_provider.dart';
+import 'package:resto_app/utils/result_state.dart';
+import 'package:resto_app/widgets/no_data_widget.dart';
 import 'package:resto_app/widgets/restaurant_tile.dart';
 import 'package:resto_app/widgets/skeleton_loading.dart';
 
@@ -89,8 +92,24 @@ class _RestaurantPageState extends State<SearchPage> {
             childCount: _searchRestaurantList?.founded,
           ));
         } else if (value.state == SearchResultState.noData) {
-          sliverList = const SliverToBoxAdapter(child: Center(child: Text('')));
-          showError('Failed to load data search!');
+          sliverList = SliverToBoxAdapter(
+              child: Padding(
+            padding: const EdgeInsets.only(top: 100.0),
+            child: Center(
+                child: Column(
+              children: [
+                Image.asset('assets/no-data-bro.png',
+                    width: MediaQuery.of(context).size.width / 1.3),
+                const SizedBox(
+                  height: 24.0,
+                ),
+                Text(
+                  value.message,
+                  style: Theme.of(context).textTheme.headline6,
+                ),
+              ],
+            )),
+          ));
         } else if (value.state == SearchResultState.error) {
           sliverList = const SliverToBoxAdapter(child: Center(child: Text('')));
           showError('Failed to load data search!');
@@ -138,8 +157,7 @@ class _RestaurantPageState extends State<SearchPage> {
               childCount: restaurantList.count,
             ));
           } else if (value.state == ResultState.noData) {
-            sliverList =
-                SliverToBoxAdapter(child: Center(child: Text(value.message)));
+            sliverList = const SliverToBoxAdapter(child: NoDataWidget());
           } else if (value.state == ResultState.error) {
             sliverList =
                 SliverToBoxAdapter(child: Center(child: Text(value.message)));
@@ -166,7 +184,7 @@ class _RestaurantPageState extends State<SearchPage> {
               elevation: 0,
               leading: IconButton(
                 onPressed: () {
-                  Navigator.pop(context);
+                  Navigation.back();
                 },
                 icon: Icon(
                   Icons.arrow_back_rounded,

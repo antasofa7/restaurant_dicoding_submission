@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:resto_app/common/navigation.dart';
 import 'package:resto_app/data/api/api_service.dart';
 import 'package:resto_app/data/models/customer_review_model.dart';
 import 'package:resto_app/data/models/menus_model.dart';
 import 'package:resto_app/data/models/restaurant_detail_model.dart';
+import 'package:resto_app/data/models/restaurant_list_model.dart';
+import 'package:resto_app/providers/database_provider.dart';
 import 'package:resto_app/providers/restaurant_detail_provider.dart';
-import 'package:resto_app/theme.dart';
+import 'package:resto_app/common/theme.dart';
+import 'package:resto_app/utils/result_state.dart';
+import 'package:resto_app/widgets/no_data_widget.dart';
 import 'package:resto_app/widgets/skeleton_loading.dart';
 import 'package:resto_app/widgets/star_rating.dart';
+import 'package:http/http.dart' as http;
 
 class DetailPage extends StatefulWidget {
   static const routeName = '/detail';
+  final String id;
 
-  const DetailPage({super.key});
+  const DetailPage({super.key, required this.id});
 
   @override
   State<DetailPage> createState() => _DetailPageState();
@@ -26,7 +33,6 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
   final TextEditingController _reviewController = TextEditingController();
   ScrollController? scrollController = ScrollController();
 
-  bool _isFav = false;
   bool _expandedTextField = false;
 
   @override
@@ -380,17 +386,16 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(message),
-          backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).errorColor,
         ));
       });
     }
 
-    Map arguments = ModalRoute.of(context)?.settings.arguments as Map;
     return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.background,
         body: ChangeNotifierProvider<RestaurantDetailProvider>(
           create: (_) => RestaurantDetailProvider(
-              apiService: ApiService(), id: arguments['id']),
+              apiService: ApiService(client: http.Client()), id: widget.id),
           child:
               Consumer<RestaurantDetailProvider>(builder: (context, state, _) {
             if (state.state == ResultState.loading) {
@@ -398,8 +403,8 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
             } else if (state.state == ResultState.hasData) {
               final RestaurantDetailModel restaurantDetail =
                   state.restaurantDetail.restaurant;
-              String imageUrl =
-                  ApiService().imageMediumUrl(restaurantDetail.pictureId);
+              String imageUrl = ApiService(client: http.Client())
+                  .imageMediumUrl(restaurantDetail.pictureId);
               return CustomScrollView(
                 slivers: [
                   SliverAppBar(
@@ -418,39 +423,80 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
                           color: Theme.of(context).colorScheme.onBackground,
                         ),
                         onPressed: () {
-                          Navigator.pop(context);
+                          Navigation.back();
                         },
                       ),
                     ),
                     actions: [
-                      Container(
-                        margin: const EdgeInsets.only(top: 16.0, right: 16.0),
-                        width: 40.0,
-                        height: 40.0,
-                        decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                            borderRadius: BorderRadius.circular(8.0)),
-                        child: IconButton(
-                          icon: ScaleTransition(
-                              scale: Tween(begin: 0.7, end: 1.0).animate(
-                                  CurvedAnimation(
-                                      parent: _favController,
-                                      curve: Curves.bounceInOut)),
-                              child: Icon(
-                                  _isFav
-                                      ? Icons.favorite
-                                      : Icons.favorite_outline,
-                                  color: whiteColor)),
-                          onPressed: () {
-                            setState(() {
-                              _isFav = !_isFav;
-                              _favController
-                                  .reverse()
-                                  .then((value) => _favController.forward());
+                      Consumer<DatabaseProvider>(
+                          builder: (context, provider, _) {
+                        return FutureBuilder<bool>(
+                            future: provider.isFavorite(restaurantDetail.id),
+                            builder: (context, AsyncSnapshot snapshot) {
+                              var isFav = snapshot.data ?? false;
+                              RestaurantListModel restaurant =
+                                  RestaurantListModel(
+                                      id: restaurantDetail.id,
+                                      name: restaurantDetail.name,
+                                      description: restaurantDetail.description,
+                                      pictureId: restaurantDetail.pictureId,
+                                      city: restaurantDetail.city,
+                                      rating: restaurantDetail.rating);
+                              return Container(
+                                margin: const EdgeInsets.only(
+                                    top: 16.0, right: 16.0),
+                                width: 40.0,
+                                height: 40.0,
+                                decoration: BoxDecoration(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    borderRadius: BorderRadius.circular(8.0)),
+                                child: ScaleTransition(
+                                  scale: Tween(begin: 0.7, end: 1.0).animate(
+                                      CurvedAnimation(
+                                          parent: _favController,
+                                          curve: Curves.bounceInOut)),
+                                  child: isFav
+                                      ? IconButton(
+                                          icon: const Icon(
+                                            Icons.favorite,
+                                            color: Colors.white,
+                                          ),
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          onPressed: () {
+                                            setState(() {
+                                              isFav = !isFav;
+                                              _favController.reverse().then(
+                                                  (value) =>
+                                                      _favController.forward());
+                                            });
+                                            provider.removeFavorite(widget.id);
+                                          },
+                                        )
+                                      : IconButton(
+                                          icon: const Icon(
+                                            Icons.favorite_border,
+                                            color: Colors.white,
+                                          ),
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          onPressed: () {
+                                            setState(() {
+                                              isFav = !isFav;
+                                              _favController.reverse().then(
+                                                  (value) =>
+                                                      _favController.forward());
+                                            });
+                                            provider.addFavorite(restaurant);
+                                          },
+                                        ),
+                                ),
+                              );
                             });
-                          },
-                        ),
-                      ),
+                      })
                     ],
                     collapsedHeight: 300.0,
                     flexibleSpace: FlexibleSpaceBar(
@@ -623,7 +669,9 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
                 ],
               );
             } else if (state.state == ResultState.noData) {
-              showError('Failed to load restaurant detail!');
+              return const SliverToBoxAdapter(
+                child: NoDataWidget(),
+              );
             } else if (state.state == ResultState.error) {
               showError('Failed to load restaurant detail!');
             }

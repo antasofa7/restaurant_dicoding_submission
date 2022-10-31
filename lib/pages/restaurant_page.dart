@@ -4,7 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:resto_app/data/models/restaurant_list_model.dart';
 import 'package:resto_app/pages/search_page.dart';
 import 'package:resto_app/providers/restaurant_provider.dart';
-import 'package:resto_app/widgets/popular_restaurant.dart';
+import 'package:resto_app/utils/result_state.dart';
+import 'package:resto_app/widgets/top_rated_restaurant.dart';
 import 'package:resto_app/widgets/restaurant_tile.dart';
 import 'package:resto_app/widgets/skeleton_loading.dart';
 
@@ -68,7 +69,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(message),
-          backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).errorColor,
         ));
       });
     }
@@ -94,10 +95,11 @@ class _RestaurantPageState extends State<RestaurantPage> {
                 margin: const EdgeInsets.only(top: 16.0, bottom: 32.0),
                 height: 220.0,
                 child: ListView.builder(
+                  key: const ValueKey('listTopRated'),
                   scrollDirection: Axis.horizontal,
                   shrinkWrap: true,
                   itemBuilder: (context, index) {
-                    return PopularRestaurant(
+                    return TopRatedRestaurant(
                       context,
                       restaurant: popularList[index],
                       index: index,
@@ -241,7 +243,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               sliver: SliverToBoxAdapter(
                 child: Text(
-                  'Popular Restaurant',
+                  'Top Rated Restaurant',
                   style: Theme.of(context).textTheme.headline6,
                 ),
               ),

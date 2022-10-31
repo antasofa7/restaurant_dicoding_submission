@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:resto_app/common/theme.dart';
 import 'package:resto_app/pages/home_page.dart';
 
 class SplashPage extends StatefulWidget {
@@ -32,14 +33,19 @@ class _SplashPageState extends State<SplashPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.restaurant_menu,
-              color: Theme.of(context).colorScheme.background,
-              size: 80.0,
+            Image.asset(
+              'assets/dish.png',
+              width: 100.0,
+            ),
+            const SizedBox(
+              height: 24.0,
             ),
             Text(
               'RestoApp',
-              style: Theme.of(context).textTheme.headline3,
+              style: Theme.of(context)
+                  .textTheme
+                  .headline5!
+                  .copyWith(color: backgroundColor),
             ),
           ],
         ),

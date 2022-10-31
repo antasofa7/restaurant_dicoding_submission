@@ -28,7 +28,9 @@ final lightTheme = ThemeData(
     background: backgroundColor,
     onBackground: blackColor,
   ),
-  cardColor: whiteColor,
+  errorColor: Colors.red,
+  disabledColor: Colors.grey.shade400,
+  highlightColor: Colors.grey.shade300,
   textTheme: const TextTheme(
     headline3: TextStyle(fontFamily: 'Oswald', color: Color(0xffF9EDE0)),
     headline5: TextStyle(
@@ -56,8 +58,11 @@ final darkTheme = ThemeData(
     background: backgroundDarkColor,
     onBackground: whiteColor,
   ),
+  errorColor: Colors.red,
+  disabledColor: accentDarkColor,
+  highlightColor: Colors.grey.shade800,
   textTheme: const TextTheme(
-    headline3: TextStyle(fontFamily: 'Oswald', color: Color(0xffF9EDE0)),
+    headline3: TextStyle(fontFamily: 'Oswald', color: backgroundColor),
     headline5: TextStyle(
         fontFamily: 'PublicSans', fontWeight: semiBold, color: primaryColor),
     headline6: TextStyle(
